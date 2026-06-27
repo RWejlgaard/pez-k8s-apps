@@ -1,0 +1,91 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: echo
+  labels:
+    istio.io/dataplane-mode: ambient
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo
+  namespace: echo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo
+  template:
+    metadata:
+      labels:
+        app: echo
+    spec:
+      nodeSelector:
+        karpenter.sh/nodepool: default
+      tolerations:
+        - key: karpenter.sh/unregistered
+          effect: NoExecute
+          operator: Exists
+      containers:
+        - name: echo
+          image: ealen/echo-server:latest
+          ports:
+            - name: http
+              containerPort: 80
+          env:
+            - name: PORT
+              value: "80"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "32Mi"
+            limits:
+              cpu: "200m"
+              memory: "64Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo
+  namespace: echo
+spec:
+  selector:
+    app: echo
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: echo-gateway
+  namespace: echo
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "echo.k8s.pez.sh"
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: echo
+  namespace: echo
+spec:
+  hosts:
+    - "echo.k8s.pez.sh"
+  gateways:
+    - echo-gateway
+  http:
+    - route:
+        - destination:
+            host: echo.echo.svc.cluster.local
+            port:
+              number: 80
