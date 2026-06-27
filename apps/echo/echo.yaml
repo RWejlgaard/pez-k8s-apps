@@ -66,8 +66,10 @@ spec:
   selector:
     istio: ingressgateway
   servers:
+    # 8080 (unprivileged) — the Helm ingress gateway listens here; its Service
+    # maps external :80 to this targetPort.
     - port:
-        number: 80
+        number: 8080
         name: http
         protocol: HTTP
       hosts:
