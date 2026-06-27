@@ -1,0 +1,90 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pez-sh
+  labels:
+    istio.io/dataplane-mode: ambient
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pez-sh
+  namespace: pez-sh
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pez-sh
+  template:
+    metadata:
+      labels:
+        app: pez-sh
+    spec:
+      nodeSelector:
+        karpenter.sh/nodepool: default
+      tolerations:
+        - key: karpenter.sh/unregistered
+          effect: NoExecute
+          operator: Exists
+      containers:
+        - name: pez-sh
+          image: rwejlgaard/pez.sh:3.0.0
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "32Mi"
+            limits:
+              cpu: "200m"
+              memory: "64Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pez-sh
+  namespace: pez-sh
+spec:
+  selector:
+    app: pez-sh
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: pez-sh-gateway
+  namespace: pez-sh
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    # 8080 (unprivileged) — the Helm ingress gateway listens here; its Service
+    # maps external :80 to this targetPort.
+    - port:
+        number: 8080
+        name: http
+        protocol: HTTP
+      hosts:
+        - "pez-sh.k8s.pez.sh"
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: pez-sh
+  namespace: pez-sh
+spec:
+  hosts:
+    - "pez-sh.k8s.pez.sh"
+  gateways:
+    - pez-sh-gateway
+  http:
+    - route:
+        - destination:
+            host: pez-sh.pez-sh.svc.cluster.local
+            port:
+              number: 8080

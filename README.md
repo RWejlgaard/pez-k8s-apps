@@ -11,5 +11,6 @@ to the ingress gateway over Tailscale).
 |-----|------|-------|
 | podinfo | podinfo.k8s.pez.sh | stefanprodan/podinfo demo app |
 | echo | echo.k8s.pez.sh | ealen/echo-server request echo |
+| pez-sh | pez-sh.k8s.pez.sh | rwejlgaard/pez.sh personal site |
 
 Workloads run on Karpenter-provisioned nodes (`nodeSelector: karpenter.sh/nodepool=default`).
