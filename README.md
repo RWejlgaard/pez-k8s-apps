@@ -3,9 +3,9 @@
 Workloads for the pez-k8s cluster, reconciled by Flux from the top-level
 [`pez-k8s`](https://github.com/RWejlgaard/pez-k8s) GitOps repo.
 
-Each app lives under `apps/<name>/` and is exposed via an Istio `Gateway` +
-`VirtualService` on `<name>.k8s.pez.sh` (TLS terminated at Caddy, which forwards
-to the ingress gateway over Tailscale).
+Each app lives under `apps/<name>/` and is exposed via a Gateway API `HTTPRoute`
+on `<name>.k8s.pez.sh`, attached to the shared `istio-system/shared-gateway`
+(TLS terminated at Caddy, which forwards to the ingress gateway over Tailscale).
 
 | App | Host | Notes |
 |-----|------|-------|

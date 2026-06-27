@@ -23,16 +23,34 @@ spec:
     spec:
       nodeSelector:
         karpenter.sh/nodepool: default
-      tolerations:
-        - key: karpenter.sh/unregistered
-          effect: NoExecute
-          operator: Exists
+      # Spread the 2 replicas across nodes so Karpenter consolidation can't take
+      # the whole app down at once. ScheduleAnyway keeps it best-effort when only
+      # one node is available.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: podinfo
       containers:
         - name: podinfo
           image: ghcr.io/stefanprodan/podinfo:6.7.0
           ports:
             - name: http
               containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
           resources:
             requests:
               cpu: "100m"
@@ -54,37 +72,29 @@ spec:
       port: 9898
       targetPort: http
 ---
-apiVersion: networking.istio.io/v1
-kind: Gateway
-metadata:
-  name: podinfo-gateway
-  namespace: podinfo
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-    # 8080 (unprivileged) — the Helm ingress gateway listens here; its Service
-    # maps external :80 to this targetPort.
-    - port:
-        number: 8080
-        name: http
-        protocol: HTTP
-      hosts:
-        - "podinfo.k8s.pez.sh"
----
-apiVersion: networking.istio.io/v1
-kind: VirtualService
+apiVersion: policy/v1
+kind: PodDisruptionBudget
 metadata:
   name: podinfo
   namespace: podinfo
 spec:
-  hosts:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: podinfo
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: podinfo
+  namespace: podinfo
+spec:
+  parentRefs:
+    - name: shared-gateway
+      namespace: istio-system
+  hostnames:
     - "podinfo.k8s.pez.sh"
-  gateways:
-    - podinfo-gateway
-  http:
-    - route:
-        - destination:
-            host: podinfo.podinfo.svc.cluster.local
-            port:
-              number: 9898
+  rules:
+    - backendRefs:
+        - name: podinfo
+          port: 9898
