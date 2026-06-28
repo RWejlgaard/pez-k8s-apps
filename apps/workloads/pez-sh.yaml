@@ -1,0 +1,9 @@
+apiVersion: kro.run/v1alpha1
+kind: Workload
+metadata:
+  name: pez-sh
+  namespace: workloads
+spec:
+  image: rwejlgaard/pez.sh:3.0.1
+  port: 8080
+  replicas: 2
