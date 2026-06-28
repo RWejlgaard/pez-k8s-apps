@@ -1,0 +1,10 @@
+apiVersion: kro.run/v1alpha1
+kind: Workload
+metadata:
+  name: echo
+  namespace: workloads
+spec:
+  image: ealen/echo-server:0.9.2
+  port: 80
+  # replicas defaults to 1; probes default to "/"; default resources.
+  # echo-server listens on 80 by default, so the old PORT=80 env was a no-op.
