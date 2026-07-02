@@ -11,5 +11,5 @@ spec:
   livenessPath: /healthz
   cpuRequest: 100m
   memoryRequest: 64Mi
-  cpuLimit: 500m
+  cpuLimit: 200m
   memoryLimit: 128Mi
