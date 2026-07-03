@@ -6,7 +6,7 @@ metadata:
 spec:
   image: rwejlgaard/pez.sh:3.0.1
   port: 8080
-  replicas: 2
+  replicas: 3
   # nginx-based image: the master runs as root and writes /var/cache/nginx +
   # /var/run at startup, so both hardening escape hatches are needed. Rebasing
   # the image on nginx-unprivileged would let these be dropped.
