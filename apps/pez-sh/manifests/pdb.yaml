@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pez-sh
+  namespace: pez-sh
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: pez-sh

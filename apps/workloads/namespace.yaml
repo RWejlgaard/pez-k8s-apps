@@ -1,8 +1,0 @@
----
-# Holds the Workload custom resources only (the control-plane objects).
-# Each Workload generates its own per-app namespace, where the actual pods,
-# Service, and HTTPRoute run. Not mesh-joined: nothing here serves traffic.
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: workloads

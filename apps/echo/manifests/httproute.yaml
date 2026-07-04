@@ -1,0 +1,15 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: echo
+  namespace: echo
+spec:
+  parentRefs:
+    - name: shared-gateway
+      namespace: istio-system
+  hostnames:
+    - echo.k8s.pez.sh
+  rules:
+    - backendRefs:
+        - name: echo
+          port: 80

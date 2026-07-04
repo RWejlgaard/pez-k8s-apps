@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pez-sh
+  namespace: pez-sh
+spec:
+  selector:
+    app: pez-sh
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
