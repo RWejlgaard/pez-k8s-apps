@@ -28,15 +28,15 @@ spec:
           type: RuntimeDefault
       nodeSelector:
         karpenter.sh/nodepool: default
-      # Hard spread so Karpenter consolidation can't drain the whole app at
-      # once; a no-op at replicas=1.
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
-          labelSelector:
-            matchLabels:
-              app: echo
+      # Hard anti-affinity so Karpenter consolidation can't drain the whole
+      # app at once; a no-op at replicas=1.
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app: echo
       containers:
         - name: echo
           image: ealen/echo-server:0.9.2

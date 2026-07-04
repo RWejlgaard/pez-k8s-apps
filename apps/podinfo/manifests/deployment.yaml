@@ -26,15 +26,15 @@ spec:
           type: RuntimeDefault
       nodeSelector:
         karpenter.sh/nodepool: default
-      # Hard spread so Karpenter consolidation can't drain the whole app at
-      # once.
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
-          labelSelector:
-            matchLabels:
-              app: podinfo
+      # Hard anti-affinity so Karpenter consolidation can't drain the whole
+      # app at once.
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app: podinfo
       containers:
         - name: podinfo
           image: ghcr.io/stefanprodan/podinfo:6.7.0
