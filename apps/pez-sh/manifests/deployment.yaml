@@ -4,7 +4,7 @@ metadata:
   name: pez-sh
   namespace: pez-sh
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: pez-sh
