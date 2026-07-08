@@ -10,7 +10,7 @@ each syncing that workload's own plain-manifest directory
 
 A workload's manifests are plain Kubernetes YAML — a dedicated namespace
 (ambient mesh-joined), ServiceAccount, Deployment, Service, and a Gateway API
-`HTTPRoute` on `<name>.k8s.pez.sh` attached to the shared
+`HTTPRoute` on `<name>.lon.pez.sh` attached to the shared
 `istio-system/shared-gateway` (TLS terminated at Caddy, which forwards to the
 ingress gateway over Tailscale). A `PodDisruptionBudget` is added whenever a
 workload runs more than one replica.
@@ -23,9 +23,9 @@ Deployment's `securityContext`.
 
 | App | Host | Notes |
 |-----|------|-------|
-| podinfo | podinfo.k8s.pez.sh | stefanprodan/podinfo demo app |
-| echo | echo.k8s.pez.sh | ealen/echo-server request echo |
-| pez-sh | pez-sh.k8s.pez.sh | rwejlgaard/pez.sh personal site |
+| podinfo | podinfo.lon.pez.sh | stefanprodan/podinfo demo app |
+| echo | echo.lon.pez.sh | ealen/echo-server request echo |
+| pez-sh | pez-sh.lon.pez.sh | rwejlgaard/pez.sh personal site |
 
 Workloads run on Karpenter-provisioned nodes (`nodeSelector: karpenter.sh/nodepool=default`).
 

@@ -8,7 +8,7 @@ spec:
     - name: shared-gateway
       namespace: istio-system
   hostnames:
-    - echo.k8s.pez.sh
+    - echo.lon.pez.sh
   rules:
     - backendRefs:
         - name: echo
