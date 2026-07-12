@@ -52,6 +52,19 @@ e.g. `httproute-patch.yaml` for the hostname), then add a
 `apps/<name>/overlays/<cluster>` and list it in that cluster's
 `clusters/<cluster>/kustomization.yaml`.
 
+## Adding a secret
+
+Secrets are sealed with the [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets)
+controller running in `pez-k8s` (see that repo's README for how to seal a
+value). Because each cluster's controller has its own independent keypair, a
+`SealedSecret` encrypted for one cluster can't be decrypted by another — so
+unlike the rest of a workload's manifests, **a `SealedSecret` always goes in
+`apps/<name>/overlays/<cluster>/`, never in `base/`**, even if the same
+logical secret exists on every cluster the workload runs on. Add it to that
+overlay's `kustomization.yaml` resources list; the `Secret` it decrypts to
+still gets referenced from `base/` (e.g. via `envFrom`/`secretKeyRef`) since
+only the name/namespace has to match, not the manifest's location.
+
 ## Adding a workload to only one cluster
 
 Skip creating an `overlays/<cluster>/` and the corresponding
