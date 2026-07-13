@@ -1,0 +1,53 @@
+# One ApplicationSet replaces the old one-Application-file-per-workload
+# pattern: it generates an ArgoCD Application per value file found under
+# clusters/pez-london/apps/*.yaml, so which apps run on this cluster is
+# controlled purely by which value files exist there.
+#
+# Each value file provides:
+#   app:      workload name, Application name and apps/<app>/base path
+#   hostname: HTTPRoute hostname for this cluster (patched into base)
+#   sourcePath: optional source path override, for workloads that need a real
+#             per-cluster overlay (e.g. a SealedSecret, which is encrypted
+#             per-cluster and can never live in base/)
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - git:
+        repoURL: https://github.com/RWejlgaard/pez-k8s-apps
+        revision: main
+        files:
+          - path: clusters/pez-london/apps/*.yaml
+  template:
+    metadata:
+      name: '{{ .app }}'
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/RWejlgaard/pez-k8s-apps
+        targetRevision: main
+        path: '{{ .sourcePath | default (printf "apps/%s/base" .app) }}'
+        kustomize:
+          patches:
+            # The hostname is the only thing that differs per cluster for a
+            # typical workload, patch it here instead of keeping a whole
+            # overlay directory per app per cluster.
+            - target:
+                kind: HTTPRoute
+              patch: |-
+                - op: replace
+                  path: /spec/hostnames
+                  value: ["{{ .hostname }}"]
+      destination:
+        server: https://kubernetes.default.svc
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
