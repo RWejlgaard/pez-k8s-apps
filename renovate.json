@@ -3,5 +3,26 @@
   "extends": ["config:recommended"],
   "kubernetes": {
     "managerFilePatterns": ["/deployment\\.yaml$/"]
-  }
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/validate\\.yaml$/"],
+      "matchStrings": [
+        "KUSTOMIZE_VERSION: \"(?<currentValue>[^\"]+)\""
+      ],
+      "depNameTemplate": "kubernetes-sigs/kustomize",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^kustomize/v(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/validate\\.yaml$/"],
+      "matchStrings": [
+        "KUBECONFORM_VERSION: \"(?<currentValue>[^\"]+)\""
+      ],
+      "depNameTemplate": "yannh/kubeconform",
+      "datasourceTemplate": "github-releases"
+    }
+  ]
 }
