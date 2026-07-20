@@ -41,7 +41,7 @@ spec:
                   app: pez-solutions
       containers:
         - name: pez-solutions
-          image: rwejlgaard/pez.solutions:0.1.0
+          image: rwejlgaard/pez.solutions:0.1.1
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
