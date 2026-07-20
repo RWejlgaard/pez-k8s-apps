@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pez-solutions
+  namespace: pez-solutions
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: pez-solutions
