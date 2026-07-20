@@ -53,6 +53,7 @@ Deployment's `securityContext`.
 | podinfo | podinfo.lon.pez.sh | podinfo.cph.pez.sh | stefanprodan/podinfo demo app |
 | echo | echo.lon.pez.sh | echo.cph.pez.sh | ealen/echo-server request echo |
 | pez-sh | pez-sh.lon.pez.sh | pez-sh.cph.pez.sh | rwejlgaard/pez.sh personal site |
+| pez-solutions | pez-solutions.lon.pez.sh | pez-solutions.cph.pez.sh | rwejlgaard/pez.solutions homelab site |
 
 Workloads run on Karpenter-provisioned nodes (`nodeSelector: karpenter.sh/nodepool=default`).
 

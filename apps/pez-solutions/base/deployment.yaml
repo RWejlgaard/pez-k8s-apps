@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pez-solutions
+  namespace: pez-solutions
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pez-solutions
+  template:
+    metadata:
+      labels:
+        app: pez-solutions
+    spec:
+      serviceAccountName: pez-solutions
+      # The SA is a mesh identity, not an API-server credential; ztunnel gets
+      # certs via istiod, the pod never needs the token.
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        # nginx-based image: the master runs as root and writes
+        # /var/cache/nginx + /var/run at startup, so it can't run under the
+        # hardened non-root/read-only defaults. Rebasing on nginx-unprivileged
+        # would let both escape hatches be dropped.
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
+        seccompProfile:
+          type: RuntimeDefault
+      nodeSelector:
+        karpenter.sh/nodepool: default
+      # Hard anti-affinity so Karpenter consolidation can't drain the whole
+      # app at once.
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app: pez-solutions
+      containers:
+        - name: pez-solutions
+          image: rwejlgaard/pez.solutions:0.1.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - NET_RAW
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
+      volumes:
+        - name: tmp
+          emptyDir: {}
