@@ -72,16 +72,16 @@ Nothing else changes.
 
 Secrets are sealed with the [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets)
 controller running in `pez-k8s` (see that repo's README for how to seal a
-value). Because each cluster's controller has its own independent keypair, a
-`SealedSecret` encrypted for one cluster can't be decrypted by another, so
-unlike the rest of a workload's manifests, **a `SealedSecret` always goes in
-`apps/<name>/overlays/<cluster>/`, never in `base/`**, even if the same
-logical secret exists on every cluster the workload runs on. Create the
-overlay (`kustomization.yaml` referencing `../../base` plus the
-`SealedSecret`), and point the workload's value file at it with
-`sourcePath: apps/<name>/overlays/<cluster>`. The `Secret` it decrypts to
-still gets referenced from `base/` (e.g. via `envFrom`/`secretKeyRef`) since
-only the name/namespace has to match, not the manifest's location.
+value). Both clusters share one keypair, so a `SealedSecret` sealed against
+either context decrypts on both — if the same logical secret applies to
+every cluster a workload runs on, seal it once and put the `SealedSecret`
+straight in `apps/<name>/base/` alongside the rest of the manifests, no
+overlay needed. Only reach for `apps/<name>/overlays/<cluster>/` when the
+secret's *value* genuinely differs per cluster (e.g. per-environment API
+keys) — same overlay mechanism as any other per-cluster divergence
+(`kustomization.yaml` referencing `../../base` plus the `SealedSecret`),
+pointed at from the workload's value file with
+`sourcePath: apps/<name>/overlays/<cluster>`.
 
 ## Adding a cluster
 
