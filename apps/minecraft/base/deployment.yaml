@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minecraft
+  namespace: minecraft
+spec:
+  replicas: 1
+  # The PVC is RWO; Recreate avoids a second pod trying to mount it (on
+  # whichever node it lands on) before the first is torn down.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: minecraft
+  template:
+    metadata:
+      labels:
+        app: minecraft
+    spec:
+      serviceAccountName: minecraft
+      # The SA is a mesh identity, not an API-server credential; ztunnel gets
+      # certs via istiod, the pod never needs the token.
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        # itzg/minecraft-server chowns/writes /data itself and has no USER
+        # directive, so it can't run under the hardened non-root defaults.
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
+        seccompProfile:
+          type: RuntimeDefault
+      nodeSelector:
+        karpenter.sh/nodepool: default
+      containers:
+        - name: minecraft
+          image: itzg/minecraft-server:2026.7.2
+          env:
+            - name: EULA
+              value: "TRUE"
+            - name: TYPE
+              value: PAPER
+            - name: MEMORY
+              value: "1536M"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          ports:
+            - name: minecraft
+              containerPort: 25565
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          # itzg's image marks itself ready via a separate mc-monitor sidecar
+          # pattern upstream, but a bare TCP check is enough here: the port
+          # only opens once world load/generation completes.
+          readinessProbe:
+            tcpSocket:
+              port: minecraft
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: minecraft
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1536Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: minecraft-data
