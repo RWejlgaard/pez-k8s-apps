@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pez-forms-config
+  namespace: pez-forms
+data:
+  APP_BASE_URL: https://forms.cph.pez.sh
+  ADMIN_EMAIL: pez@pez.sh
+  JELLYFIN_URL: https://jellyfin.pez.sh
+  SMTP_HOST: mail.pez.sh
+  SMTP_PORT: "465"
+  SMTP_SECURE: "true"
+  SMTP_FROM: "Pez Solutions <automation@pez.solutions>"

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pez-forms
+  namespace: pez-forms
+spec:
+  selector:
+    app: pez-forms
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
