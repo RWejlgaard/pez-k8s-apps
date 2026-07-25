@@ -37,7 +37,7 @@ spec:
                   app: pez-forms
       containers:
         - name: pez-forms
-          image: rwejlgaard/pez-forms:v1.0.0
+          image: rwejlgaard/pez-forms:v1.1.0
           envFrom:
             - configMapRef:
                 name: pez-forms-config
