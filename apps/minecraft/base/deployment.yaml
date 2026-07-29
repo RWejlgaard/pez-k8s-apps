@@ -41,7 +41,7 @@ spec:
             - name: TYPE
               value: PAPER
             - name: MEMORY
-              value: "1536M"
+              value: "8192M"
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -68,11 +68,11 @@ spec:
             periodSeconds: 20
           resources:
             requests:
-              cpu: 500m
-              memory: 1536Mi
+              cpu: "4"
+              memory: 8Gi
             limits:
-              cpu: "2"
-              memory: 2Gi
+              cpu: "4"
+              memory: 8Gi
       volumes:
         - name: data
           persistentVolumeClaim:
