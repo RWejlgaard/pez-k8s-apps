@@ -73,12 +73,12 @@ Nothing else changes.
 Secrets are sealed with the [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets)
 controller running in `pez-k8s` (see that repo's README for how to seal a
 value). Both clusters share one keypair, so a `SealedSecret` sealed against
-either context decrypts on both — if the same logical secret applies to
+either context decrypts on both - if the same logical secret applies to
 every cluster a workload runs on, seal it once and put the `SealedSecret`
 straight in `apps/<name>/base/` alongside the rest of the manifests, no
 overlay needed. Only reach for `apps/<name>/overlays/<cluster>/` when the
 secret's *value* genuinely differs per cluster (e.g. per-environment API
-keys) — same overlay mechanism as any other per-cluster divergence
+keys) - same overlay mechanism as any other per-cluster divergence
 (`kustomization.yaml` referencing `../../base` plus the `SealedSecret`),
 pointed at from the workload's value file with
 `sourcePath: apps/<name>/overlays/<cluster>`.
