@@ -34,9 +34,6 @@ spec:
         path: '{{ .sourcePath | default (printf "apps/%s/base" .app) }}'
         kustomize:
           patches:
-            # The hostname is the only thing that differs per cluster for a
-            # typical workload, patch it here instead of keeping a whole
-            # overlay directory per app per cluster.
             - target:
                 kind: HTTPRoute
               patch: |-
