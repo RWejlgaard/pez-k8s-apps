@@ -37,7 +37,7 @@ spec:
                   app: podinfo
       containers:
         - name: podinfo
-          image: ghcr.io/stefanprodan/podinfo:6.14.1
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
